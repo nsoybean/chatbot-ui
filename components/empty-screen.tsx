@@ -7,15 +7,16 @@ import { IconArrowRight } from '@/components/ui/icons'
 const exampleMessages = [
   {
     heading: 'Explain technical concepts',
-    message: `What is a "serverless function"?`
+    message: `What is inbound and outbound marketing?`
   },
   {
-    heading: 'Summarize an article',
-    message: 'Summarize the following article for a 2nd grader: \n'
+    heading: 'Generate email subject',
+    message:
+      'Write an email subject line for an email to promote [PRODUCT/ SERVICE YOU WANT TO PROMOTE]. The target audience is [TARGET AUDIENCE]. Create 10 variations that are [MENTION TONE/STYLE]. Add keywords [MENTION KEYWORDS].'
   },
   {
-    heading: 'Draft an email',
-    message: `Draft an email to my boss about the following: \n`
+    heading: 'Draft blog post',
+    message: `Generate four title options for a blog post about [INSERT TOPICS HERE], use the following keywords in the title [INSERT KEYWORDS].`
   }
 ]
 
@@ -24,15 +25,13 @@ export function EmptyScreen({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
     <div className="mx-auto max-w-2xl px-4">
       <div className="rounded-lg border bg-background p-8">
         <h1 className="mb-2 text-lg font-semibold">
-          Welcome to Next.js AI Chatbot!
+          Welcome to Mavic.ai Chatbot!
         </h1>
         <p className="mb-2 leading-normal text-muted-foreground">
-          This is an open source AI chatbot app template built with{' '}
-          <ExternalLink href="https://nextjs.org">Next.js</ExternalLink> and{' '}
-          <ExternalLink href="https://vercel.com/storage/kv">
-            Vercel KV
-          </ExternalLink>
-          .
+          Hi there! I'm a trained digital marketer ready to assist you. What
+          questions do you have today? Whether it's about SEO, social media,
+          content strategy, or anything else, I'm here to help you navigate the
+          world of digital marketing. Ask away!
         </p>
         <p className="leading-normal text-muted-foreground">
           You can start a conversation here or try the following examples:
