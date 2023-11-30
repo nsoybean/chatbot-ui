@@ -22,6 +22,7 @@ async function UserOrLogin() {
   const session = await auth()
   return (
     <>
+      {/* side bar button */}
       {session?.user ? (
         <Sidebar>
           <React.Suspense fallback={<div className="flex-1 overflow-auto" />}>
@@ -38,6 +39,8 @@ async function UserOrLogin() {
           <IconNextChat className="hidden w-6 h-6 mr-2 dark:block" />
         </Link>
       )}
+
+      {/* avatar if signed in, else login button */}
       <div className="flex items-center">
         <IconSeparator className="w-6 h-6 text-muted-foreground/50" />
         {session?.user ? (
