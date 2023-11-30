@@ -50,12 +50,16 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
           toast.error(response.statusText)
         }
       },
+      onError() {
+        toast.error('Error occured')
+      },
       onFinish() {
         if (!path.includes('chat')) {
           router.push(`/chat/${id}`, { shallow: true })
           router.refresh()
         }
       }
+      // api:  // defaults to '/api/chat'
     })
   return (
     <>
@@ -80,6 +84,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
         setInput={setInput}
       />
 
+      {/* only for preview env */}
       <Dialog open={previewTokenDialog} onOpenChange={setPreviewTokenDialog}>
         <DialogContent>
           <DialogHeader>
