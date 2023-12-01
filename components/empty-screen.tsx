@@ -9,8 +9,8 @@ const exampleMessages = [
     message: `What is inbound and outbound marketing?`
   },
   {
-    heading: 'Draft blog post',
-    message: `Generate four title options for a blog post about [INSERT TOPICS HERE], use the following keywords in the title [INSERT KEYWORDS].`
+    heading: 'Draft blog post title',
+    message: `Generate four title options for a blog post title about [INSERT TOPICS HERE], use the following keywords in the title [INSERT KEYWORDS].`
   },
   {
     heading: 'Teach me something today',
