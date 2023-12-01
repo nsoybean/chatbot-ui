@@ -1,7 +1,6 @@
 import { UseChatHelpers } from 'ai/react'
 
 import { Button } from '@/components/ui/button'
-import { ExternalLink } from '@/components/external-link'
 import { IconArrowRight } from '@/components/ui/icons'
 
 const exampleMessages = [
@@ -10,13 +9,12 @@ const exampleMessages = [
     message: `What is inbound and outbound marketing?`
   },
   {
-    heading: 'Generate email subject',
-    message:
-      'Write an email subject line for an email to promote [PRODUCT/ SERVICE YOU WANT TO PROMOTE]. The target audience is [TARGET AUDIENCE]. Create 10 variations that are [MENTION TONE/STYLE]. Add keywords [MENTION KEYWORDS].'
-  },
-  {
     heading: 'Draft blog post',
     message: `Generate four title options for a blog post about [INSERT TOPICS HERE], use the following keywords in the title [INSERT KEYWORDS].`
+  },
+  {
+    heading: 'Teach me something today',
+    message: `Could you please teach me a concept today in 100 words or less? Share insights on its significance, key strategies, and practical applications. I'm eager to grasp a comprehensive understanding that extends beyond the basics. Your guidance will greatly aid in expanding my knowledge. Thank you for imparting valuable insights!`
   }
 ]
 

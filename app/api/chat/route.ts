@@ -39,7 +39,9 @@ export const combineDocumentsPromptTemplate = ChatPromptTemplate.fromMessages([
 // config
 const lastKChatHistory = process.env.LAST_K_CHAT_HISTORY || 5
 const database = process.env.MONGODB_DATABASE || 'test'
-const collection = process.env.MONGODB_COLLECTION || 'memory'
+const chatMemoryCollection = process.env.MONGODB_CHAT_MEM_COLLECTION || 'memory'
+const userChatListCollection =
+  process.env.MONGODB_USER_CHAT_LIST_COLLECTION || 'userChatList'
 
 // export const runtime = 'edge'
 
@@ -53,7 +55,8 @@ const model = new ChatOpenAI({
 
 // init DB
 const client = new MongoClient(process.env.MONGODB_URI || '')
-const chatMemoryCol = client.db(database).collection(collection)
+const chatMemoryCol = client.db(database).collection(chatMemoryCollection)
+const userChatListCol = client.db(database).collection(userChatListCollection)
 
 // main API route
 export async function POST(req: Request) {
@@ -61,10 +64,10 @@ export async function POST(req: Request) {
   await client.connect()
 
   const json = await req.json()
-  const { messages, previewToken, id: chatID } = json
+  const { messages, id: chatId } = json
 
   const userId = (await auth())?.user.id
-  console.log(`🚀 chatID: ${chatID}, userId: ${userId}`)
+  console.log(`🚀 chatId: ${chatId}, userId: ${userId}`)
 
   if (!userId) {
     return new Response('Unauthorized', {
@@ -86,7 +89,7 @@ export async function POST(req: Request) {
         const chatMemory = await chatMemoryCol
           .find(
             {
-              userChatID: `${userId}-${chatID}`
+              userChatId: `${userId}-${chatId}`
             },
             {
               projection: {
@@ -129,21 +132,51 @@ export async function POST(req: Request) {
               const id = json.id ?? nanoid()
               const createdAt = Date.now()
               const path = `/chat/${id}`
+              const chatId = id
               const payload = {
                 title,
                 userId,
                 createdAt,
-                path
+                path,
+                chatId
               }
               console.log('🚀 aiMsg:', aiMsg.content)
+
+              // upsert chat memory
               await chatMemoryCol.updateOne(
-                { userChatID: `${userId}-${chatID}` },
+                { userChatId: `${userId}-${chatId}` },
                 {
                   $setOnInsert: payload, // only on first instance
                   $push: { messages: { $each: [humanMsg, aiMsg] } } // append new user and AI msg
                 },
                 { upsert: true }
               )
+
+              // upsert user's chat list
+              const userChat = await userChatListCol.findOne({
+                userId: userId,
+                'chats.id': chatId
+              })
+              if (userChat) {
+                await userChatListCol.updateOne(
+                  { userId: userId, 'chats.id': chatId },
+                  {
+                    $set: { 'chats.$[element].updatedAt': Date.now() }
+                  },
+                  {
+                    arrayFilters: [{ 'element.id': chatId }]
+                  }
+                )
+              } else {
+                await userChatListCol.updateOne(
+                  { userId: userId },
+                  {
+                    $set: { userId: userId },
+                    $push: { chats: { id: chatId, updatedAt: Date.now() } }
+                  },
+                  { upsert: true }
+                )
+              }
             } catch (error) {
               console.log(`Server Error! Msg: ${JSON.stringify(error)}`)
             }
