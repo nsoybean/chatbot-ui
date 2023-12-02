@@ -66,7 +66,6 @@ export async function POST(req: Request) {
 
   const json = await req.json()
   const { messages, id: chatId } = json
-  console.log('🚀 ~ file: route.ts:68 ~ POST ~ messages:', messages)
 
   const userId = (await auth())?.user.id
   console.log(`🚀 chatId: ${chatId}, userId: ${userId}`)
