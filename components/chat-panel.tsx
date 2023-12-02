@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { PromptForm } from '@/components/prompt-form'
 import { ButtonScrollToBottom } from '@/components/button-scroll-to-bottom'
 import { IconRefresh, IconStop } from '@/components/ui/icons'
+import { ChatBotRole } from '@/lib/types'
 export interface ChatPanelProps
   extends Pick<
     UseChatHelpers,
@@ -67,7 +68,7 @@ export function ChatPanel({
               await append({
                 id,
                 content: value,
-                role: 'user'
+                role: ChatBotRole.Human
               })
             }}
             input={input}

@@ -16,3 +16,8 @@ export type ServerActionResult<Result> = Promise<
       error: string
     }
 >
+
+export enum ChatBotRole {
+  Human = 'user',
+  AI = 'ai'
+}

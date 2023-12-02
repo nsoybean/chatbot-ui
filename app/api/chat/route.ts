@@ -21,7 +21,8 @@ import {
 import { ChatOpenAI } from 'langchain/chat_models/openai'
 import { LLMResult } from 'langchain/dist/schema'
 
-import { convertToBaseMessage } from '../helper/utils'
+import { convertToBaseMessage } from '@/lib/utils'
+import { ChatBotRole } from '@/lib/types'
 
 // Prompt constant
 export const combineDocumentsPromptTemplate = ChatPromptTemplate.fromMessages([
@@ -65,6 +66,7 @@ export async function POST(req: Request) {
 
   const json = await req.json()
   const { messages, id: chatId } = json
+  console.log('🚀 ~ file: route.ts:68 ~ POST ~ messages:', messages)
 
   const userId = (await auth())?.user.id
   console.log(`🚀 chatId: ${chatId}, userId: ${userId}`)
@@ -111,12 +113,12 @@ export async function POST(req: Request) {
     outputParser
   ])
 
-  const userMsg = messages.at(-1).content
-  console.log('🚀 userMsg:', userMsg)
+  const userQn = messages.at(-1).content
+  console.log('🚀 user qn:', userQn)
 
   const stream = await chain.stream(
     {
-      question: userMsg
+      question: userQn
     },
     {
       callbacks: [
@@ -125,8 +127,8 @@ export async function POST(req: Request) {
             try {
               const LLMOutput = output.generations[0][0].text
               // persist
-              const humanMsg = { role: 'human', content: userMsg }
-              const aiMsg = { role: 'ai', content: LLMOutput }
+              const humanMsg = { role: ChatBotRole.Human, content: userQn }
+              const aiMsg = { role: ChatBotRole.AI, content: LLMOutput }
 
               const title = json.messages[0].content.substring(0, 100) // first 100 char as chat title
               const id = json.id ?? nanoid()
