@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from 'clsx'
 import { customAlphabet } from 'nanoid'
 import { twMerge } from 'tailwind-merge'
-import { HumanMessage, AIMessage } from 'langchain/dist/schema'
+import { HumanMessage, AIMessage } from 'langchain/schema'
 import { ChatBotRole } from './types'
 
 export function cn(...inputs: ClassValue[]) {

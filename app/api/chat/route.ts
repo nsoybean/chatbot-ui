@@ -1,12 +1,10 @@
 /**
  * to consider moving into standlone node server for scalability/ microservice architecture
  */
-import { kv } from '@vercel/kv'
 import { StreamingTextResponse } from 'ai'
 
 import { auth } from '@/auth'
 import { nanoid } from '@/lib/utils'
-import { MongoClient } from 'mongodb'
 
 import { RunnableSequence } from 'langchain/schema/runnable'
 import { BytesOutputParser } from 'langchain/schema/output_parser'
@@ -24,8 +22,10 @@ import { LLMResult } from 'langchain/dist/schema'
 import { convertToBaseMessage } from '@/lib/utils'
 import { ChatBotRole } from '@/lib/types'
 
+import clientPromise from '@/lib/mongodb'
+
 // Prompt constant
-export const combineDocumentsPromptTemplate = ChatPromptTemplate.fromMessages([
+const combineDocumentsPromptTemplate = ChatPromptTemplate.fromMessages([
   AIMessagePromptTemplate.fromTemplate(
     `You are a digital marketing manager.
     Use the following pieces of chat_history and knowledge to answer the question at the end. 
@@ -54,15 +54,11 @@ const model = new ChatOpenAI({
   streaming: true
 })
 
-// init DB
-const client = new MongoClient(process.env.MONGODB_URI || '')
-const chatMemoryCol = client.db(database).collection(chatMemoryCollection)
-const userChatListCol = client.db(database).collection(userChatListCollection)
-
 // main API route
 export async function POST(req: Request) {
   // db
-  await client.connect()
+  const client = await clientPromise
+  const db = client.db(database)
 
   const json = await req.json()
   const { messages, id: chatId } = json
@@ -87,7 +83,8 @@ export async function POST(req: Request) {
     {
       question: (input: { question: string }) => input.question,
       chat_history: async () => {
-        const chatMemory = await chatMemoryCol
+        const chatMemory = await db
+          .collection(chatMemoryCollection)
           .find(
             {
               chatId: chatId,
@@ -145,7 +142,7 @@ export async function POST(req: Request) {
               console.log('🚀 aiMsg:', aiMsg.content)
 
               // upsert chat memory
-              await chatMemoryCol.updateOne(
+              await db.collection(chatMemoryCollection).updateOne(
                 { chatId: chatId, userId: userId },
                 {
                   $setOnInsert: payload, // only on first instance
@@ -155,12 +152,14 @@ export async function POST(req: Request) {
               )
 
               // upsert user's chat list
-              const userChat = await userChatListCol.findOne({
-                userId: userId,
-                'chats.id': chatId
-              })
+              const userChat = await db
+                .collection(userChatListCollection)
+                .findOne({
+                  userId: userId,
+                  'chats.id': chatId
+                })
               if (userChat) {
-                await userChatListCol.updateOne(
+                await db.collection(userChatListCollection).updateOne(
                   { userId: userId, 'chats.id': chatId },
                   {
                     $set: { 'chats.$[element].updatedAt': Date.now() }
@@ -170,7 +169,7 @@ export async function POST(req: Request) {
                   }
                 )
               } else {
-                await userChatListCol.updateOne(
+                await db.collection(userChatListCollection).updateOne(
                   { userId: userId },
                   {
                     $set: { userId: userId },

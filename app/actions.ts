@@ -6,15 +6,12 @@ import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { type Chat } from '@/lib/types'
 
-import { MongoClient } from 'mongodb'
+import clientPromise from '@/lib/mongodb'
 
 const database = process.env.MONGODB_DATABASE || 'test'
 const chatMemoryCollection = process.env.MONGODB_CHAT_MEM_COLLECTION || 'memory'
 const userChatListCollection =
   process.env.MONGODB_USER_CHAT_LIST_COLLECTION || 'userChatList'
-const client = new MongoClient(process.env.MONGODB_URI || '')
-const chatMemoryCol = client.db(database).collection(chatMemoryCollection)
-const userChatListCol = client.db(database).collection(userChatListCollection)
 
 export async function getChats(userId?: string | null) {
   if (!userId) {
@@ -22,14 +19,19 @@ export async function getChats(userId?: string | null) {
   }
 
   try {
+    const client = await clientPromise
+    const db = client.db(database)
+
     let results: Chat[] = []
-    const chats = await userChatListCol.findOne({ userId })
+    const chats = await db
+      .collection(userChatListCollection)
+      .findOne({ userId })
     if (!chats) {
       return []
     }
 
     for (const chat of chats.chats) {
-      const chatData = await chatMemoryCol.findOne(
+      const chatData = await db.collection(chatMemoryCollection).findOne(
         {
           chatId: chat.id
         }
@@ -57,7 +59,10 @@ export async function getChats(userId?: string | null) {
 }
 
 export async function getChat(id: string, userId: string) {
-  const chat = await chatMemoryCol.findOne({
+  const client = await clientPromise
+  const db = client.db(database)
+
+  const chat = await db.collection(chatMemoryCollection).findOne({
     chatId: id
   })
 
@@ -88,9 +93,15 @@ export async function removeChat({ id, path }: { id: string; path: string }) {
   }
 
   // delete chat data
-  await chatMemoryCol.deleteOne({ chatId: id, userId: userId })
+  const client = await clientPromise
+  const db = client.db(database)
+  await db
+    .collection(chatMemoryCollection)
+    .deleteOne({ chatId: id, userId: userId })
   // remove chat from user's chat list
-  await userChatListCol.updateOne({ userId }, { $pull: { chats: { id: id } } })
+  await db
+    .collection(userChatListCollection)
+    .updateOne({ userId }, { $pull: { chats: { id: id } } })
 
   revalidatePath('/')
   return revalidatePath(path)
@@ -106,16 +117,18 @@ export async function clearChats() {
     }
   }
 
-  const chats = await userChatListCol.findOne({ userId })
+  const client = await clientPromise
+  const db = client.db(database)
+  const chats = await db.collection(userChatListCollection).findOne({ userId })
   if (!chats || !chats.chats.length) {
     return redirect('/')
   }
 
   // delete all chat data related to user
-  await chatMemoryCol.deleteMany({ userId })
+  await db.collection(chatMemoryCollection).deleteMany({ userId })
 
   // reset chat list
-  await userChatListCol.updateOne(
+  await await db.collection(userChatListCollection).updateOne(
     { userId },
     {
       $set: { chats: [] }
@@ -127,7 +140,10 @@ export async function clearChats() {
 }
 
 export async function getSharedChat(id: string) {
-  const chat = await chatMemoryCol.findOne({
+  const client = await clientPromise
+  const db = client.db(database)
+
+  const chat = await db.collection(chatMemoryCollection).findOne({
     sharePath: `/share/${id}`
   })
 
@@ -149,7 +165,10 @@ export async function shareChat(chat: Chat) {
 
   const userId = session?.user?.id
   const chatId = chat.id
-  await chatMemoryCol.updateOne(
+
+  const client = await clientPromise
+  const db = client.db(database)
+  await db.collection(chatMemoryCollection).updateOne(
     { chatId: chatId, userId: userId },
     {
       $set: {
