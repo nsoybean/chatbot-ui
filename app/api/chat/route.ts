@@ -90,7 +90,8 @@ export async function POST(req: Request) {
         const chatMemory = await chatMemoryCol
           .find(
             {
-              userChatId: `${userId}-${chatId}`
+              chatId: chatId,
+              userId: userId
             },
             {
               projection: {
@@ -145,7 +146,7 @@ export async function POST(req: Request) {
 
               // upsert chat memory
               await chatMemoryCol.updateOne(
-                { userChatId: `${userId}-${chatId}` },
+                { chatId: chatId, userId: userId },
                 {
                   $setOnInsert: payload, // only on first instance
                   $push: { messages: { $each: [humanMsg, aiMsg] } } // append new user and AI msg

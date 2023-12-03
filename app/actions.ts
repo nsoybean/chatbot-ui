@@ -31,7 +31,7 @@ export async function getChats(userId?: string | null) {
     for (const chat of chats.chats) {
       const chatData = await chatMemoryCol.findOne(
         {
-          userChatId: `${userId}-${chat.id}`
+          chatId: chat.id
         }
         // { projection: { messages: 0 } } // TODO @sb: consider excluding as large data sent over network. Currently used to show number of messages before sharing chat
       )
@@ -58,7 +58,7 @@ export async function getChats(userId?: string | null) {
 
 export async function getChat(id: string, userId: string) {
   const chat = await chatMemoryCol.findOne({
-    userChatId: `${userId}-${id}`
+    chatId: id
   })
 
   if (!chat || (userId && chat.userId !== userId)) {
@@ -88,7 +88,7 @@ export async function removeChat({ id, path }: { id: string; path: string }) {
   }
 
   // delete chat data
-  await chatMemoryCol.deleteOne({ userChatId: `${userId}-${id}` })
+  await chatMemoryCol.deleteOne({ chatId: id, userId: userId })
   // remove chat from user's chat list
   await userChatListCol.updateOne({ userId }, { $pull: { chats: { id: id } } })
 
@@ -150,7 +150,7 @@ export async function shareChat(chat: Chat) {
   const userId = session?.user?.id
   const chatId = chat.id
   await chatMemoryCol.updateOne(
-    { userChatId: `${userId}-${chatId}` },
+    { chatId: chatId, userId: userId },
     {
       $set: {
         sharePath: `/share/${chat.id}`
