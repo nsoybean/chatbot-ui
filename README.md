@@ -26,8 +26,18 @@
   - Styling with [Tailwind CSS](https://tailwindcss.com)
   - [Radix UI](https://radix-ui.com) for headless component primitives
   - Icons from [Phosphor Icons](https://phosphoricons.com)
-- Chat History, rate limiting, and session storage with [MongoDB](https://www.mongodb.com/)
+- [MongoDB](https://www.mongodb.com/): Chat History, User Chat list
 - [NextAuth.js](https://github.com/nextauthjs/next-auth) for authentication
+
+<br/>
+
+## Coming Soon
+- [Mongoose](https://mongoosejs.com/): ORM for mongoose
+- [Vercel KV](https://vercel.com/docs/storage/vercel-kv): Rate limiting
+- Authentication provider
+  - Github, Google, Twitter
+  - Email
+  - Credentials
 
 <br/>
 
