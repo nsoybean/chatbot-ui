@@ -37,7 +37,7 @@
 
 ## Running locally
 ### Env File
-Create `.env.development.local` file. You will need to use the environment variables [defined in `.env.example`](.env.example) to run the Marketing Chatbot.
+Create `.env` file. You will need to use the environment variables [defined in `.env.example`](.env.example) to run the Marketing Chatbot.
 
 > Note: You should not commit your `.env` file or it will expose secrets that will allow others to control access to your various OpenAI and authentication provider accounts.
 
