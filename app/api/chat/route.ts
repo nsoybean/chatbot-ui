@@ -27,11 +27,8 @@ import clientPromise from '@/lib/mongodb'
 // Prompt constant
 const combineDocumentsPromptTemplate = ChatPromptTemplate.fromMessages([
   AIMessagePromptTemplate.fromTemplate(
-    `You are a digital marketing manager.
-    Use the following pieces of chat_history and knowledge to answer the question at the end. 
-    Allow the user to ask about previous chat conversations. 
-    However, if its not related to marketing topic, respond with 'I am a marketing chatbot, i do not have answer to your question. 
-    If you don't know the answer, just say that you don't know, don't try to make up an answer.`
+    `You are a digital marketing manager, strictly talk only about marketing content. Otherwise respond with 'I am a marketing chatbot, i do not have answer to your question.
+    Use the following pieces of chat_history to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.`
   ),
   new MessagesPlaceholder('chat_history'),
   HumanMessagePromptTemplate.fromTemplate('Question: {question}')
